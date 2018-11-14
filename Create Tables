@@ -1,0 +1,272 @@
+/*
+DESCRIPTION
+File:               ASSIGNMENT 1 CREATE TABLES
+Author:             TYLER TEMPLETON
+Oracle username:    S11_112
+Description:
+With SQL Developer create a script which will create all of the tables.
+
+Start the script with a series of DROP statements so that as you correct 
+mistakes you will start fresh each time. To avoid referential integrity
+errors, the drops should be in the opposite order of the create table 
+statements.
+
+*/
+
+SET LINESIZE 132
+SET PAGESIZE 255
+
+
+DROP TABLE PROSPECT;
+DROP TABLE SERVWORK;
+DROP TABLE SERVINV;
+DROP TABLE INVOPTION;
+DROP TABLE SALEINV;
+DROP TABLE BASEOPTION;
+DROP TABLE CAR;
+DROP TABLE EMPLOYEE;
+DROP TABLE OPTIONS;
+DROP TABLE CUSTOMER;
+
+CREATE TABLE CUSTOMER
+    (cname      CHAR(20)
+    ,cstreet    CHAR(10)    NOT NULL
+    ,ccity      CHAR(20)    NOT NULL
+    ,cprov      CHAR(20)    NOT NULL
+    ,Cpostal    CHAR(10)
+    ,chphone    CHAR(13)
+    ,cbphone    CHAR(13)
+    ,CONSTRAINT CNAME_PK PRIMARY KEY (cname)
+   
+);
+CREATE TABLE OPTIONS AS SELECT *
+FROM s11.options WHERE 1=0;
+--CREATE TABLE OPTIONS
+--    (Ocode  CHAR(4)
+--    ,odec   CHAR(30)
+--    ,olist  NUMERIC(7,2)
+--    ,ocost  NUMERIC(7,2)
+--    ,CONSTRAINT OCODE_PK PRIMARY KEY (ocode)
+--);
+
+CREATE TABLE EMPLOYEE
+    (empname        CHAR(20)
+    ,startdate      DATE    NOT NULL
+    ,manager        CHAR(20)
+    ,commissionrate  NUMERIC(2,0)
+    ,title          CHAR(26)
+    ,CONSTRAINT EMPNAME_PK PRIMARY KEY (empname)
+    ,CONSTRAINT MANAGER_FK FOREIGN KEY (Manager)
+         REFERENCES EMPLOYEE(Empname)
+);
+
+CREATE TABLE CAR
+    (serial         CHAR(8)
+    ,cname          CHAR(20)
+    ,make           CHAR(10)    NOT NULL
+    ,Model          CHAR(8)     NOT NULL
+    ,cyear          CHAR(4)     NOT NULL
+    ,color          CHAR(12)    NOT NULL
+    ,trim           CHAR(16)    NOT NULL
+    ,enginetype     CHAR(10)    NOT NULL
+    ,purchinv       CHAR(6)
+    ,Purchdate      DATE
+    ,purchfrom      CHAR(12)
+    ,purchcost      NUMERIC(9,2)
+    ,freightcost    NUMERIC(9,2)
+    ,totalcost      NUMERIC(9,2) AS (PURCHCOST+FREIGHTCOST)
+    ,listprice      NUMERIC(9,2)
+    ,CONSTRAINT  SERIAL_PK PRIMARY KEY (SERIAL)
+    ,CONSTRAINT CNAME_FK FOREIGN KEY (CNAME) 
+        REFERENCES CUSTOMER(CNAME)
+    
+
+);
+
+CREATE TABLE BASEOPTION
+    (serial     CHAR(8)
+    ,ocode      CHAR(4)
+    ,CONSTRAINT SERIAL_FK FOREIGN KEY (Serial)
+        REFERENCES CAR(serial)
+    ,CONSTRAINT OCODE_FK FOREIGN KEY (ocode)
+        REFERENCES OPTIONS(ocode)
+);
+
+CREATE TABLE SALEINV
+    (saleinv    CHAR(6)
+    ,cname      CHAR(20)    NOT NULL
+    ,salesman   CHAR(20)    NOT NULL
+    ,saledate   DATE        NOT NULL
+    ,serial     CHAR(8)     NOT NULL
+    ,Totalprice NUMERIC(9,2)
+    ,discount   NUMERIC(8,2)
+    ,net        NUMERIC(9,2)
+    ,tax        NUMERIC(8,2) 
+    ,licfee     NUMERIC(6,2)
+    ,commission NUMERIC(8,2)
+    ,Tradeserial CHAR(8) NOT NULL
+    ,tradeallow NUMERIC(9,2)
+    ,fire       CHAR(1)
+    ,collision  CHAR(1)
+    ,liability  CHAR(1)
+    ,property   CHAR(1)
+    ,CONSTRAINT SALEINV_PK PRIMARY KEY (Saleinv)
+    ,CONSTRAINT CNAME_SALEINV_FK FOREIGN KEY (cname) 
+        REFERENCES CUSTOMER(CNAME)
+    ,CONSTRAINT SALESMAN_FK FOREIGN KEY (salesman)
+        REFERENCES EMPLOYEE(EMPNAME)
+    ,CONSTRAINT SERIAL_SALEINV_FK FOREIGN KEY(serial)
+        REFERENCES CAR(SERIAL)
+    ,CONSTRAINT TRADESERIAL_FK FOREIGN KEY (tradeserial)
+        REFERENCES CAR(SERIAL)
+    
+    ,CHECK (saledate > TO_DATE('01-JAN-1990','DD-MON-YYYY'))
+    ,CHECK (fire        IN ('Y','N'))
+    ,CHECK (collision   IN ('Y','N'))
+    ,CHECK (liability   IN ('Y','N'))
+    ,CHECK (property    IN ('Y','N'))
+    
+);
+CREATE SEQUENCE saleinv_seq 
+        MINVALUE 1
+        START WITH 1
+        INCREMENT BY 1
+        CACHE 10;
+CREATE TABLE INVOPTION as select* from s11.invoption where 1=0;
+    (saleinv    CHAR(6)
+    ,ocode      CHAR(4)
+    ,saleprice  NUMERIC(7,2)    NOT NULL
+    ,CONSTRAINT pk_Invoption PRIMARY KEY (SALEINV,OCODE)
+    ,CONSTRAINT SALEINV_FK FOREIGN KEY (SALEINV) REFERENCES SALEINV(SALEINV)
+    ,CONSTRAINT OCODE_INVOPTION_FK FOREIGN KEY (OCODE) REFERENCES OPTIONS(OCODE)
+);
+
+INSERT INTO options (ocode, odesc                   ,  ocost,  olist)
+             VALUES ('CD2', 'CD PLAYER'             , 110.00, 195.00);
+INSERT INTO options (ocode, odesc                   ,  ocost,  olist)
+             VALUES ('ED3', 'ELECTRONIC INSTRUMENTS', 423.00, 557.00);
+INSERT INTO options (ocode, odesc                   ,  ocost,  olist)
+             VALUES ('M24', 'TAPE DECK'             , 210.00, 285.00);
+INSERT INTO options (ocode, odesc                   ,  ocost,  olist)
+             VALUES ('R41', 'RECLINING BUCKET SEATS', 305.00, 420.00);
+INSERT INTO options (ocode, odesc                   ,  ocost,  olist)
+             VALUES ('S22', 'TINTED SUN ROOF'       , 333.00, 386.00);
+INSERT INTO options (ocode, odesc                   ,  ocost,  olist)
+             VALUES ('S20', 'SKI RACK'              , 212.00, 285.00);
+INSERT INTO options (ocode, odesc                   ,  ocost,  olist)
+             VALUES ('U20', 'BLACK UPHOLSTRY'       ,  88.00, 106.48);
+INSERT INTO options (ocode, odesc                   ,  ocost,  olist)
+             VALUES ('M14', 'STEREO RADIO'          , 292.00, 350.00);
+INSERT INTO options (ocode, odesc                   ,  ocost,  olist)
+             VALUES ('E01', 'EXTENDED WARRANTY'     , 270.50, 345.00);
+INSERT INTO options (ocode, odesc                   ,  ocost,  olist)
+             VALUES ('L07', 'LIGHTING GROUP'        ,  95.25, 109.60);
+INSERT INTO options (ocode, odesc                   ,  ocost,  olist)
+             VALUES ('R14', 'STEREO RADIO'          , 210.00, 295.00);
+INSERT INTO options (ocode, odesc                   ,  ocost,  olist)
+             VALUES ('S23', 'SUN ROOF'              , 300.00, 355.50);
+INSERT INTO options (ocode, odesc                   ,  ocost,  olist)
+             VALUES ('S88', 'SUN ROOF'              , 430.40, 490.99);
+INSERT INTO options (ocode, odesc                   ,  ocost,  olist)
+             VALUES ('S54', 'MOON ROOF'             , 310.00, 375.00);
+INSERT INTO options (ocode, odesc                   ,  ocost,  olist)
+             VALUES ('W11', 'ALUMINUM WHEELS'       , 500.00, 664.00);
+INSERT INTO options (ocode, odesc                   ,  ocost,  olist)
+             VALUES ('SD1', 'DELUXE SOUND SYSTEM'   , 310.00, 488.00);
+INSERT INTO options (ocode, odesc                   ,  ocost,  olist)
+             VALUES ('H35', 'HOOD ORNAMENT'         ,  98.50, 145.00);
+INSERT INTO options (ocode, odesc                   ,  ocost,  olist)
+             VALUES ('L01', 'LIGHTNING STRIPE'      ,  72.20,  95.44);
+INSERT INTO options (ocode, odesc                   ,  ocost,  olist)
+             VALUES ('R96', 'RADIO W/SURROUND SOUND', 160.00, 190.89);
+INSERT INTO options (ocode, odesc                   ,  ocost,  olist)
+             VALUES ('R00', 'TINY RADIO W/1 SPEAKER',  67.10,  84.22);
+COMMIT;
+
+CREATE TABLE SERVINV as select * from s11.servinv where 1=0;
+    (servinv    CHAR(5)
+    ,serdate    DATE        NOT NULL
+    ,cname      CHAR(20)    NOT NULL
+    ,serial     CHAR(8)     NOT NULL
+    ,partscost  NUMERIC(7,2)
+    ,labourcost NUMERIC(7,2)
+    ,tax        NUMERIC(6,2) 
+    ,totalcost  NUMERIC(8,2)        AS (partscost+ labourcost + tax)
+    ,CONSTRAINT CNAME_SERV_FK       FOREIGN KEY (Cname) 
+        REFERENCES CUSTOMER(CNAME) 
+    ,CONSTRAINT SERIAL_SERVINV_FK   FOREIGN KEY (serial)
+        REFERENCES CAR(serial)
+
+);
+CREATE SEQUENCE servinv_seq 
+        MINVALUE 1
+        START WITH 1
+        INCREMENT BY 1
+        CACHE 10;
+        
+CREATE TABLE SERVWORK
+    (SERVINV    CHAR(5)
+    ,WORKDESC   CHAR(80)
+    ,CONSTRAINT SERVINV_PK PRIMARY KEY (SERVINV)
+    
+);
+drop table prospect;
+CREATE TABLE PROSPECT AS select * from s11.prospect where 1=0;
+    (cname  CHAR(20) NOT NULL
+    ,make   CHAR(10) NOT NULL
+    ,model  CHAR(8)
+    ,cyear  CHAR(4)
+    ,color  CHAR(12)
+    ,trim   CHAR(16)
+    ,ocode  CHAR(4)  NOT NULL
+    ,CONSTRAINT CNAME_PROSPECT_FK FOREIGN KEY (cname)
+        REFERENCES CUSTOMER(CNAME)
+    ,CONSTRAINT OCODE_PROSPECT_FK FOREIGN KEY (ocode)
+        REFERENCES CAR(serial)
+);
+
+
+/*
+-------------------- OUTPUT RESULT START ---------------------------
+
+Table PROSPECT dropped.
+
+Table SERVWORK dropped.
+
+Table SERVINV dropped.
+
+Table INVOPTION dropped.
+
+Table SALEINV dropped.
+
+Table BASEOPTION dropped.
+
+Table CAR dropped.
+
+Table EMPLOYEE dropped.
+
+Table OPTIONS dropped.
+
+Table CUSTOMER dropped.
+
+Table CUSTOMER created.
+
+Table OPTIONS created.
+
+Table EMPLOYEE created.
+
+Table CAR created.
+
+Table BASEOPTION created.
+
+Table SALEINV created.
+
+Table INVOPTION created.
+
+Table SERVINV created.
+
+Table SERVWORK created.
+
+Table PROSPECT created.
+-------------------- OUTPUT RESULT END -----------------------------
+*/

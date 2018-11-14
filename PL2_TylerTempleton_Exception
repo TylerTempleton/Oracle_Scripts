@@ -1,0 +1,81 @@
+/*
+DESCRIPTION
+File:               
+Author:             TYLER TEMPLETON
+Oracle username:    S11_112
+Description:
+PL Assignment 2: For this assignment you are going to write two scripts
+
+*/
+
+SET LINESIZE 132
+SET PAGESIZE 255
+
+/*
+EXCEPTION SCRIPT
+Write a script that would require a make and a model as inputs and prints out the number of cars sold and the average of the
+sale price before taxes (net) of the cars for that make and model.
+To handle exceptional cases use exceptions that will be raised in two different circumstances
+
+when no cars of the inputed make and model are sold
+
+when only one car is sold.
+
+If no cars are sold just display a message
+
+If only one car is sold, print only the price (net) and not the average.
+*/
+
+SET SERVEROUTPUT ON;
+ACCEPT p_make PROMPT 'enter make';
+ACCEPT p_model PROMPT 'enter model';
+VARIABLE g_output VARCHAR2(200);
+
+DECLARE
+v_count NUMBER(6); 
+v_avg NUMBER(6,2);
+v_net saleinv.net%type;
+onecar EXCEPTION; 
+
+
+BEGIN
+    SELECT COUNT(*), AVG(net)
+    INTO v_count,v_avg
+    FROM car
+    JOIN saleinv sale
+    ON car.serial=sale.serial
+     WHERE   UPPER(make)  = UPPER('&p_make') 
+     AND     UPPER(model) = UPPER('&p_model') ;
+    IF v_count = 1 THEN
+    RAISE onecar;
+    END IF;
+ EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      :g_output := 'No Car data for that make/model exist';
+    
+    WHEN onecar THEN
+    SELECT net
+    INTO v_net
+    FROM car
+    JOIN saleinv sale
+    ON car.serial=sale.serial
+     WHERE   UPPER(make)  = UPPER('&p_make') 
+     AND     UPPER(model) = UPPER('&p_model') ;
+    :g_output := 'price is' || v_net;
+    
+    WHEN VALUE_ERROR THEN
+    :g_output := 'BAD vlaues Entered';
+    
+    WHEN OTHERS THEN
+    :g_output := 'Something Dun goofed up that not 1 car or missing data';
+END;
+/
+
+
+
+/*
+-------------------- OUTPUT RESULT START ---------------------------
+
+PL/SQL procedure successfully completed.
+-------------------- OUTPUT RESULT END -----------------------------
+*/

@@ -1,0 +1,53 @@
+/*
+DESCRIPTION
+File:               
+Author:             TYLER TEMPLETON
+Oracle username:    S11_112
+Description:
+PL Assignment 3: For this assignment you need to create 5 scripts:
+*/
+
+SET LINESIZE 132
+SET PAGESIZE 255
+
+/*
+Write a stored procedure which accepts a customer name as a parameter and "returns" the number of cars the customer has bought 
+and total amount of money he/she has spent. Test the above procedure by writing a script which:
+
+prompts the user for a beginning letter
+prompts the user for an ending letter
+calls the procedure to show the total spent and the number of cars purchased by each customer whose name begins with a letter
+between the beginning and ending letters (inclusive). For example if the beginning letter is "A" and the ending letter is "D",
+the result should show all the customers whose name begins with A, B, C and D. If "A" and "Z" is entered the result should show 
+all customers. Use a cursor and include appropriate exception handling.
+Hint:
+See REGEXP_LIKE operator on how to find the names that begin with letters included between two given values.
+*/
+
+
+CREATE OR REPLACE PROCEDURE get_customers
+(
+pl_cname servinv.cname%type,
+pl_totalprice SERVINV.TOTALCOST%type
+
+)
+IS
+pl_letter1 CHAR(1);
+pl_letter2 CHAR(1);
+BEGIN  
+  SELECT cname, COUNT(cname) AS cars_bought, ROUND(SUM(totalprice),2) AS total_spent
+  INTO pl_cname,pl_totalprice
+  From SALEINV
+     WHERE REGEXP_LIKE (cname, '^[&pl_letter1-&pl_letter2](*)')
+      GROUP BY cname;
+
+END get_customers;
+/
+
+
+/*
+-------------------- OUTPUT RESULT START ---------------------------
+
+
+-------------------- OUTPUT RESULT END -----------------------------
+*/

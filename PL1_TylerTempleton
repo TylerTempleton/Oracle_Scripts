@@ -1,0 +1,65 @@
+/*
+DESCRIPTION
+File:               
+Author:             TYLER TEMPLETON
+Oracle username:    S11_112
+Description:
+PL Assignment 1 
+For this assignment you are going to create three PL/SQL (not SQL or a combination of SqlPlus and SQL) scripts:
+*/
+
+
+SET VERIFY on
+SET LINESIZE 132
+SET PAGESIZE 255
+
+
+/*
+Create the first script which prompts for the name of a salesman and finds out how many cars he/she has sold. Use an IF or CASE 
+statement to display three different messages based on the outcome. If the result is greater than 1, display something like 
+"JACK SPRATT has sold 27 cars", if the result is zero display something like "JOHN JOHNSON has sold no cars", and if the result
+is one display something like "SAM SLICKER has sold only one car".
+Hint: As you know the salesman name is kept in the saleinv, and is a foreign key to the employee table.
+*/
+
+
+
+SET SERVEROUTPUT ON;
+ACCEPT p_name PROMPT 'Enter enter the name of salesman'
+    VARIABLE g_output VARCHAR2(200);
+DECLARE
+    v_count NUMBER;
+    v_name CHAR(25) := UPPER('&p_name');
+    
+BEGIN
+    SELECT COUNT(*) INTO v_count
+    FROM saleinv
+    WHERE UPPER(SALESMAN) = v_name;   
+    IF v_count>1 THEN 
+    :g_output:= UPPER('&p_name') ||  ' HAS SOLD ' || v_count|| ' CARS';
+    ELSIF v_count =1 THEN
+    :g_output:= UPPER('&p_name') ||  ' HAS ONLY SOLD ' || v_count|| ' CAR';
+    ELSE 
+    :g_output:= UPPER('&p_name') ||  ' HAS YET TO SELL A CAR';
+    END IF;
+END;
+/
+print g_output
+/*
+-------------------- OUTPUT RESULT START ---------------------------
+G_OUTPUT
+--------------------------------------------------------------------------------
+ADAM ADAMS HAS SOLD 42 CARS
+
+G_OUTPUT
+--------------------------------------------------------------------------------
+MIKE MECHANIC HAS ONLY SOLD 1 CAR
+
+G_OUTPUT
+--------------------------------------------------------------------------------
+PERRY PARTS HAS YET TO SELL A CAR
+
+
+-------------------- OUTPUT RESULT END -----------------------------
+*/
+

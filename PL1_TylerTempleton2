@@ -1,0 +1,53 @@
+/*
+DESCRIPTION
+File:               
+Author:             TYLER TEMPLETON
+Oracle username:    S11_112
+Description:
+PL Assignment 1 
+For this assignment you are going to create three PL/SQL (not SQL or a combination of SqlPlus and SQL) scripts:
+*/
+
+SET VERIFY on
+SET LINESIZE 132
+SET PAGESIZE 255
+
+
+/*
+Create a second script to input a servinv # and print the service information coresponding to that servinv.
+Hint: Use one of methods described in this module to declare the variables and assign values to them using an SQL statement. Then, concatenate those values for easy printing.
+*/
+
+
+SET SERVEROUTPUT ON;
+ACCEPT p_servinv PROMPT 'Enter enter the service invoice'
+    VARIABLE g_output VARCHAR2(200);
+DECLARE
+    
+    v_date          servinv.serdate%type;
+    v_cname         servinv.cname%type;
+    v_serial        servinv.serial%type;
+    v_partcost      servinv.partscost%type;
+    v_laborcost     servinv.laborcost%type;
+    v_tax           servinv.tax%type;
+    v_totalcost     servinv.totalcost%type;
+    
+BEGIN
+    SELECT serdate, cname,   serial,   partscost,  laborcost,   tax,   totalcost 
+    INTO   v_date,   v_cname, v_serial, v_partcost, v_laborcost, v_tax, v_totalcost 
+    FROM servinv
+    WHERE servinv.servinv = UPPER('&p_servinv');   
+    :g_output:= 'Service Number: '|| UPPER('&p_servinv ') ||  ' Date: '|| v_date ||' Serial: ' ||  v_serial||' Partcost: '|| v_partcost||' Laborcost: '|| v_laborcost||' Tax: '|| v_tax||' Totalcost: '|| v_totalcost;
+END;
+/
+print g_output
+
+/*
+-------------------- OUTPUT RESULT START ---------------------------
+G_OUTPUT
+--------------------------------------------------------------------------------
+Service Number: W0003  Date: 2000-01-18 Serial: A96WRSX3 Partcost: 83.22 Laborcost: 200.33 Tax: 36.86 Totalcost: 320.41
+
+
+-------------------- OUTPUT RESULT END -----------------------------
+*/

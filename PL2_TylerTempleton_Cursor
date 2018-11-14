@@ -1,0 +1,100 @@
+/*
+DESCRIPTION
+File:               
+Author:             TYLER TEMPLETON
+Oracle username:    S11_112
+Description:
+PL Assignment 2: For this assignment you are going to write two scripts
+
+*/
+
+SET LINESIZE 132
+SET PAGESIZE 255
+
+/*
+CURSOR SCRIPT
+Use the cursor approach to write a script which will print mailing labels for customers who own a car of a given make, model 
+and year (prompt the user to enter the values for them)
+Each label must be four lines high.
+Print the input parameters on the first label (two lines for the make, model and year and two empty lines)
+Print each label on three lines with one blank line between each label.
+The script's output should look like the following:
+
+JAGUAR XKR
+2015
+
+                
+Jose Andrade
+3044 Drumloch Ave
+Oakville On L6M5H8
+                
+Tyler Abbott
+60 Talbot St.
+St Thomas Ontario N5P1A4
+*/
+
+ACCEPT p_make   PROMPT 'Please enter the Make'
+ACCEPT p_model  PROMPT 'Please Enter the Model'
+ACCEPT p_year   PROMPT 'Please Enter the Year'
+VARIABLE g_output VARCHAR2(5000);
+DECLARE
+    v_make      car.make%TYPE;
+    v_model     car.model%TYPE;
+    v_cyear     car.cyear%TYPE;
+    v_cname     customer.cname%TYPE;
+    v_cstreet   customer.cstreet%TYPE;
+    v_ccity     customer.ccity%TYPE;
+    v_cprov     customer.cprov%TYPE;
+    v_cpostal   customer.cpostal%TYPE;
+    CURSOR mmy_cur IS
+        SELECT make, model , cyear, c.cname, c.cstreet, c.ccity, c.cprov, c.cpostal
+        FROM CAR
+        JOIN customer  c 
+        ON c.cname = car.cname
+        WHERE   UPPER(make)  = UPPER('&p_make') 
+        AND     UPPER(model) = UPPER('&p_model')
+        AND     cyear  = '&p_year' ;
+BEGIN
+             
+    OPEN mmy_cur;
+        LOOP
+            FETCH mmy_cur INTO v_make, v_model, v_cyear, v_cname, v_cstreet, v_ccity, v_cprov, v_cpostal;
+            EXIT WHEN mmy_cur%NOTFOUND;
+        
+             :g_output:=: g_output|| v_cname ;
+             :g_output:= :g_output || v_cstreet ;
+             :g_output:=: g_output|| v_ccity || ' ' || v_cprov || '  '|| v_cpostal;
+             :g_output:= '' ;
+             
+         END LOOP;        
+    CLOSE mmy_cur;
+    :g_output:= :g_output|| UPPER('&p_make')|| '  ' || UPPER('&p_model');
+             :g_output:= :g_output|| UPPER('&p_year');
+             :g_output:= ' ';
+             :g_output:= ' ';
+END;
+/
+PRINT g_output
+    
+
+
+/*
+-------------------- OUTPUT RESULT START ---------------------------
+JAGUAR XKR
+2015
+
+
+JIM BOD 
+Craso
+Toronto ON M6C3F8
+
+TYLER ABBOTT
+60 TALBOT ST.
+ST THOMAS ON N5P1A4
+
+JOSE ANDRADE
+3044 DURMLOCH AVE 
+OAKVILLE ON L6M5H8
+
+-------------------- OUTPUT RESULT END -----------------------------
+*/

@@ -1,0 +1,373 @@
+/*
+DESCRIPTION
+File:               Specialty Imports SQL Query Assignment
+Author:             TYLER TEMPLETON
+Oracle username:    S11_112
+Description:
+Assignment 3  SELECT tables
+*/
+
+SET LINESIZE 132
+SET PAGESIZE 255
+
+/*
+1. List all the data in all tables. (Keep the data in a file but do not print for submission. Only submit the
+query syntax for this question. Use the data to verify the correctness of your other queries.)*/
+SELECT * FROM s11.BASEOPTION; 
+SELECT * FROM s11.CAR; 
+SELECT * FROM s11.CUSTOMER; 
+SELECT * FROM s11.EMPLOYEE; 
+SELECT * FROM s11.INVOPTION; 
+SELECT * FROM s11.OPTIONS; 
+SELECT * FROM s11.PROSPECT; 
+SELECT * FROM s11.SALEINV; 
+SELECT * FROM s11.SERVINV; 
+SELECT * FROM s11.SERVWORK; 
+
+
+/*
+2. How many vehicles were sold with some kind of insurance?
+*/
+
+SELECT count(* )
+FROM s11.saleinv
+WHERE fire = 'Y' 
+OR collision= 'Y' 
+OR liability='Y' 
+OR property ='Y' ;
+
+/*
+-------------------- OUTPUT RESULT START ---------------------------
+COUNT(*)
+----------
+       148
+-------------------- OUTPUT RESULT END -----------------------------
+*/
+
+
+/*
+3. Show all customer information for people interested in blue Jaguars
+*/
+
+
+SELECT * 
+FROM s11.customer customer
+INNER JOIN  s11.prospect prospect
+ON customer.cname = prospect.cname
+WHERE s11.prospect.make = 'JAGUAR' 
+AND s11.prospect.color ='BLUE';
+
+
+/*
+-------------------- OUTPUT RESULT START ---------------------------
+
+CNAME                CSTREET              CCITY                CPROV                CPOSTAL    CHPHONE       CBPHONE       CNAME                MAKE       MODEL    CYEA COLOR        TRIM             OCOD
+-------------------- -------------------- -------------------- -------------------- ---------- ------------- ------------- -------------------- ---------- -------- ---- ------------ ---------------- ----
+JAMES POULTER        123 NEGRA AROYO LANE OAKVILLE             ONTARIO              H0H 0H0    (905)555-5555 (416)555-5555 JAMES POULTER        JAGUAR     XJ       2018 BLUE         BLACK            L01 
+SHAWN WATSON         2119 Farnham Place   Burlington           ON                   L7P 1W9    (905)319-3791 (905)342-4054 SHAWN WATSON         JAGUAR     XT5000   2005 BLUE         red flame        S23 
+SHAWN WATSON         2119 Farnham Place   Burlington           ON                   L7P 1W9    (905)319-3791 (905)342-4054 SHAWN WATSON         JAGUAR     XT5000   2005 BLUE         green line       R96 
+ROBERT SILVEIRA      302 PINEGROVE ROAD   OAKVILLE             ON                   L6K 3P8    (883)433-4456 (333)345-3434 ROBERT SILVEIRA      JAGUAR     XZ       2003 BLUE         TURBO            CD2 
+JOHN MARSHALL        GLENDALE             KITCHENER            ON                   A1A1A1     (555)123-4567               JOHN MARSHALL        JAGUAR              2015 BLUE                          E01 
+JOHN1MARSHALL        GLENDALE             KITCHENER            ON                   A1A1A1     (555)123-4567               JOHN1MARSHALL        JAGUAR              2015 BLUE                          E01 
+BRUNO PETLA          123 Any Street       Oakville             ON                   L6J 3N2    (905)333-3333 (905)555-5555 BRUNO PETLA          JAGUAR     F-PACE   2014 BLUE                          W11 
+
+7 rows selected.  
+-------------------- OUTPUT RESULT END -----------------------------
+*/
+
+
+/*
+4.List the names and home phone numbers of customers who purchased Jaguar XJRs and who do not
+have a business phone. (Descending name order) (No duplicates.)
+*/
+ SELECT DISTINCT customer.cname, chphone, cbphone
+ FROM s11.customer customer
+ INNER JOIN s11.saleinv saleinv
+ ON customer.cname = saleinv.cname
+ WHERE saleinv.serial LIKE 'J%XJR%' 
+ AND customer.cbphone IS null
+ ORDER BY cname desc ;
+ 
+/*
+-------------------- OUTPUT RESULT START ---------------------------
+
+CNAME                CHPHONE       CBPHONE      
+-------------------- ------------- -------------
+KEN ISAACS                                      
+JONNY TEST           (519)637-7242              
+JAVAAGAR SRITHAR     (416)231-8184              
+
+-------------------- OUTPUT RESULT END -----------------------------
+*/
+
+/*
+5.What is the average cost of service visits on 2016 Mercedes? 
+*/
+
+SELECT ROUND(AVG(totalcost),2)
+FROM s11.servinv
+WHERE servinv.serial LIKE 'M16%';
+
+/*
+-------------------- OUTPUT RESULT START ---------------------------
+AVG(TOTALCOST)
+--------------
+      460.72
+-------------------- OUTPUT RESULT END -----------------------------
+*/
+
+
+/*
+6. List the name and phone number of all customers who have purchased a car from us but have never
+come in for servicing.
+*/
+
+
+SELECT DISTINCT customer.cname, chphone, cbphone
+FROM s11.customer customer
+FULL OUTER JOIN s11.servinv servinv
+ON customer.cname = servinv.cname
+WHERE customer.cname IS NULL 
+OR servinv.cname IS NULL
+;
+
+/*
+-------------------- OUTPUT RESULT START ---------------------------
+CNAME                CHPHONE       CBPHONE      
+-------------------- ------------- -------------
+MR.BLERG             (416)529-8145 (123)456-7890
+ROBERT S             (905)999-9999 (111)111-1112
+SSSSSSS              (222)222-2222 (123)456-7890
+ADRIEN GIROUD        (905)726-8129 (647)909-4040
+.
+407 records omitted
+.
+AUSTIN M             (226)868-2354              
+BRUNO PETLA          (905)333-3333 (905)555-5555
+COLIN BINNIE         (905)777-1235 (289)843-4454           
+
+414 rows selected. 
+-------------------- OUTPUT RESULT END -----------------------------
+*/
+
+
+/*
+7. Print the mailing label formatted name, full address, car make and model of the person who
+purchased the most expensive car from us.
+*/
+SELECT DISTINCT c.cname, c.cstreet || ',' || c.ccity|| ',' || cprov|| ',' ||cpostal AS address, make, model
+FROM S11.SALEINV
+INNER JOIN s11.customer c
+ON saleinv.cname= c.cname
+INNER JOIN s11.car
+ON car.cname = c.cname
+WHERE saleinv.totalprice = 
+(SELECT MAX(totalprice)
+FROM s11.saleinv)
+;
+/*
+
+
+-------------------- OUTPUT RESULT START ---------------------------
+
+CNAME                ADDRESS                                                                   MAKE       MODEL   
+-------------------- ------------------------------------------------------------------------- ---------- --------
+CORY SVENSSON        6240 Millers Grove  ,Mississauga         ,ON                  ,L5N 3C8    MERCEDES   FUNMOB  
+
+
+-------------------- OUTPUT RESULT END -----------------------------
+*/
+/*8.  Print the total number and average dollar value of service visits for each of Land Rovers, Mercedes and
+Jaguars sold between February 2014 and January 2018 inclusive.
+*/
+select ROUND(SUM(totalcost),2),ROUND(AVG(totalcost),2)
+FROM s11.servinv
+WHERE servinv.serial LIKE 'L%' 
+OR servinv.serial LIKE 'M%' 
+OR servinv.serial LIKE 'J%' 
+AND serdate  BETWEEN '2014-02-01' AND '2018-01-31';
+ 
+/*
+-------------------- OUTPUT RESULT START ---------------------------
+ROUND(SUM(TOTALCOST),2) ROUND(AVG(TOTALCOST),2)
+----------------------- -----------------------
+              297631.86                 1277.39
+
+-------------------- OUTPUT RESULT END -----------------------------
+*/
+
+/*
+9.Print a list of salespersons names who have sold less than 3 cars 
+*/
+
+
+SELECT DISTINCT saleinv.salesman
+FROM  s11.saleinv 
+WHERE salesman IN 
+(SELECT  salesman FROM s11.saleinv 
+GROUP BY salesman HAVING COUNT(salesman)<3);
+
+
+/*
+-------------------- OUTPUT RESULT START ---------------------------
+SALESMAN            
+--------------------
+JONNY GOLIGHTLY     
+Pete Money          
+Sam Slicker         
+DEVON WOODCOMB      
+MAURICE RISNER      
+Maurice Risner      
+Mike Mechanic       
+Piecemeal Henry     
+PIECEMEAL HENRY     
+Sloan Shop          
+Noreen Newbie       
+
+11 rows selected. 
+
+-------------------- OUTPUT RESULT END -----------------------------
+*/
+
+
+/*
+10. List the names of all customers who purchased cars with sunroofs. (Description has 'SUN ROOF' in it.)
+*/
+SELECT DISTINCT cname 
+FROM s11.saleinv saleinv
+INNER JOIN  s11.invoption invoption
+ON saleinv.saleinv = invoption.saleinv 
+WHERE ocode = 'S22' 
+OR ocode = 'S23' 
+OR ocode ='S88';
+
+/*
+-------------------- OUTPUT RESULT START ---------------------------
+CNAME               
+--------------------
+MATTHEW VILJAKAINEN 
+AUSTIN PEREIRA      
+RICHARD ELDER       
+.
+23 recored omitted
+.
+ANJU KOHLI          
+HUSSEIN ALTAMIMI    
+BOB HILL            
+
+29 rows selected. 
+
+-------------------- OUTPUT RESULT END -----------------------------
+*/
+
+
+/*
+11.List all 2017 cars which are not sold (serial#, make, model).
+Add (option#, optiondesc, option list price)
+if they have options
+*/
+
+
+SELECT car.serial, car.make, car.model, options.ocode, options.odesc, options.olist
+FROM s11.car
+FULL OUTER JOIN s11.baseoption  boptions 
+ON car.serial = boptions.serial
+FULL OUTER JOIN s11.options  options 
+ON boptions.ocode = options.ocode
+WHERE cname is NULL AND car.serial LIKE '%17%';
+
+/*
+-------------------- OUTPUT RESULT START ---------------------------
+SERIAL   MAKE       MODEL    OCOD ODESC                               OLIST
+-------- ---------- -------- ---- ------------------------------ ----------
+M17BSED0 MERCEDES   SEDAN    CD2  CD PLAYER                             195
+A17BNSX7 ACURA      NSX      CD2  CD PLAYER                             195
+H17SRLX0 HYBRID     RLX      U20  BLACK UPHOLSTRY                    106.48
+M17GS653 MERCEDES   S65      E01  EXTENDED WARRANTY                     345
+A17RMDX4 ACURA      MDX      L07  LIGHTING GROUP                      109.6
+A17RMDX4 ACURA      MDX      R14  STEREO RADIO                          295
+M17RCLS1 MERCEDES   CLS 550  S23  SUN ROOF                            355.5
+A17RMDX4 ACURA      MDX      S23  SUN ROOF                            355.5
+M17RAMG0 MERCEDES   AMG-GT   S88  SUN ROOF                           490.99
+A17BNSX0 ACURA      NSX      S54  MOON ROOF                             375
+M17BSED0 MERCEDES   SEDAN    W11  ALUMINUM WHEELS                       664
+M17RCLS1 MERCEDES   CLS 550  SD1  DELUXE SOUND SYSTEM                   488
+M17GS653 MERCEDES   S65      SD1  DELUXE SOUND SYSTEM                   488
+M17RAMG0 MERCEDES   AMG-GT   R96  RADIO W/SURROUND SOUND             190.89
+A17BNSX0 ACURA      NSX      R96  RADIO W/SURROUND SOUND             190.89
+H17BELA1 HYUNDAI    ELANTRA                                                
+A17BTLX4 ACURA      TLX                                                    
+T17BCOR0 TOYOTA     COROLLA                                                
+F17RMUS1 ACURA      MDX                                                    
+
+19 rows selected. 
+
+-------------------- OUTPUT RESULT END -----------------------------
+*/
+
+
+
+/*
+12.Who are the customers living in Brampton who have purchased a car with $1000 or more of extra
+options? Include the total amount of the extra options in the output. (Ascending order)
+*/
+
+
+SELECT DISTINCT customer.cname
+FROM s11.customer customer
+INNER JOIN s11.car car
+ON  customer.cname = car.cname
+INNER JOIN s11.saleinv saleinv
+ON  car.serial = saleinv.serial
+INNER JOIN s11.invoption invoption
+ON saleinv.saleinv = invoption.saleinv
+WHERE  customer.ccity = 'Brampton ' AND invoption.saleinv IN 
+(SELECT  saleinv FROM s11.invoption 
+GROUP BY saleinv HAVING SUM(saleprice)>1000) 
+;
+
+/*
+-------------------- OUTPUT RESULT START ---------------------------
+CNAME               
+--------------------
+GAGANJOT SINGH      
+DEJAN P
+
+-------------------- OUTPUT RESULT END -----------------------------
+*/
+
+
+/*
+13.List the name, address and home phone of customers interested in any car which is on the lot unsold.
+Match on make, model, year and color. Include the matching criteria in the output. 
+*/
+
+SELECT DISTINCT c.cname, c.cstreet || ',' || c.ccity|| ',' || cprov|| ',' ||cpostal AS address, car.make, car.model, car.cyear, car.color
+FROM s11.customer c
+INNER JOIN s11.prospect p
+ON p.cname= c.cname
+INNER JOIN s11.car car
+ON car.model = p.model
+WHERE car.cname IS NULL 
+;
+
+
+
+/*
+-------------------- OUTPUT RESULT START ---------------------------
+CNAME                ADDRESS                                                                   MAKE       MODEL    CYEA COLOR       
+-------------------- ------------------------------------------------------------------------- ---------- -------- ---- ------------
+SMARTH ARORA         21 CASTLEFIELD ROAD ,OAKVILLE            ,ON                  ,L6Y 4R4    LAND ROVER EVOQUE   2015 Black       
+VSEVOLOD             109 Roxton road     ,Oakville            ,ON                  ,L6H-6V3    LAND ROVER DISCOVER 2015 GREEN       
+VSEVOLOD             109 Roxton road     ,Oakville            ,ON                  ,L6H-6V3    LAND ROVER DISCOVER 1998 ORANGE      
+.
+omitted 357 rows
+.
+BRUNO PETLA          123 Any Street      ,Oakville            ,ON                  ,L6J 3N2    JAGUAR     XJ       2015 white       
+JAMES KEELING        Avenue.st           ,Oakville            ,ONT                 ,L3R4R6     ACURA      MDX      2016 WHITE       
+JODY KIRTON          1 LakeShore Blvd    ,Toronto             ,ONTARIO             ,M8V1G1     ACURA      NSX      2017 BLACK       
+
+363 rows selected. 
+
+-------------------- OUTPUT RESULT END -----------------------------
+*/

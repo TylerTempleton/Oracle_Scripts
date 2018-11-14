@@ -1,0 +1,72 @@
+/*
+DESCRIPTION
+File:               
+Author:             TYLER TEMPLETON
+Oracle username:    S11_112
+Description:
+PL Assignment 1 
+For this assignment you are going to create three PL/SQL (not SQL or a combination of SqlPlus and SQL) scripts:
+*/
+
+SET VERIFY off
+SET LINESIZE 132
+SET PAGESIZE 255
+
+/*
+Create a third script for changing customer names in the database. The script will prompt the user for the existing customer 
+name, then prompts again for the new name and successfully changes that customer's name in the database.Hint: Remember that 
+customer table is connected through foreign key constraints with four tables: car, saleinv, servinv and prospect. Therefore 
+all those tables need to be also updated when you change the value of the primary key in the car table.
+
+
+SET SERVEROUTPUT ON;
+ACCEPT p_oldcustname PROMPT 'Enter enter the name you wish to replace'
+ACCEPT p_newcustname PROMPT 'Enter enter the new name'
+    VARIABLE g_output VARCHAR2(200);
+DECLARE
+    
+BEGIN
+   INSERT INTO customer
+   SELECT '&p_newcustname', cstreet, ccity, cprov, cpostal, chphone, cbphone
+      FROM customer
+     WHERE UPPER(cname) = UPPER('&p_oldcustname');
+
+
+UPDATE saleinv
+    SET cname =   '&p_newcustname'
+    WHERE cname =  '&p_oldcustname';
+
+UPDATE car
+    SET cname =   '&p_newcustname'
+    WHERE cname =  '&p_oldcustname';
+
+UPDATE servinv
+  SET cname =   '&p_newcustname'
+  WHERE cname =  '&p_oldcustname';
+  
+UPDATE prospect
+  SET cname =   '&p_newcustname'
+  WHERE cname =  '&p_oldcustname';  
+
+
+DELETE FROM customer
+ WHERE cname =  '&p_oldcustname';
+
+END;
+/
+print g_output
+
+
+/*
+-------------------- OUTPUT RESULT START ---------------------------
+
+G_OUTPUT
+--------------------------------------------------------------------------------
+
+PL/SQL procedure successfully completed.
+
+-------------------- OUTPUT RESULT END -----------------------------
+*/
+
+
+

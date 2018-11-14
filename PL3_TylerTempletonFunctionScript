@@ -1,0 +1,41 @@
+/*
+DESCRIPTION
+File:               
+Author:             TYLER TEMPLETON
+Oracle username:    S11_112
+Description:
+PL Assignment 3: For this assignment you need to create 5 scripts:
+*/
+
+SET LINESIZE 132
+SET PAGESIZE 255
+
+/*
+Prepare a function to return the total number of options on a car given the serial number of the car.
+Include both base options and invoice options.
+Write a script to test the function which:
+
+inputs the serial#
+outputs the serial#, make, model and # of options
+Include any needed exception handling.
+*/
+
+
+ACCEPT pl_serial PROMPT 'enter serial for  # of options'
+SELECT   serial, make , model, get_options('&pl_serial') as "# of options"
+FROM car
+WHERE serial = '&pl_serial';
+
+/*
+-------------------- OUTPUT RESULT START ---------------------------
+
+SERIAL   MAKE       MODEL    # of options
+-------- ---------- -------- ------------
+J20BFTY3 JAGUAR     F-TYPE              2
+
+
+SERIAL   MAKE       MODEL    # of options
+-------- ---------- -------- ------------
+J16PSMA0 JAGUAR     SMALLVAN            4
+-------------------- OUTPUT RESULT END -----------------------------
+*/
